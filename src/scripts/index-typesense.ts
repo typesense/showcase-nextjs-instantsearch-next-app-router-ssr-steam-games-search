@@ -1,41 +1,15 @@
-import { Client, Errors } from "typesense";
-import fs from "fs";
-import path from "path";
-import { z } from "zod";
+import { gameSchema, typesenseSchema } from "@/lib/schema";
+import { typesenseConfig } from "@/lib/typesense";
 import { getUnixTime, parse } from "date-fns";
-import ora from "ora";
 import { upAll } from "docker-compose";
+import fs from "fs";
+import ora from "ora";
+import path from "path";
+import { Client, Errors } from "typesense";
+import { z } from "zod";
 
 // Instantiate the Typesense client
-const client = new Client({
-  nodes: [
-    {
-      host: "localhost",
-      port: 8108,
-      protocol: "http",
-    },
-  ],
-  apiKey: "xyz",
-  retryIntervalSeconds: 2,
-});
-
-const gameSchema = z.object({
-  name: z.string(),
-  release_date: z.string(),
-  price: z.number(),
-  positive: z.number(),
-  negative: z.number(),
-  app_id: z.number(),
-  min_owners: z.number(),
-  max_owners: z.number(),
-  htlb_single: z.union([z.number(), z.undefined()]),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const typesenseSchema = gameSchema.omit({ htlb_single: true, release_date: true }).extend({
-  release_date: z.number(),
-  htlb_single: z.number(),
-});
+const client = new Client(typesenseConfig);
 
 function parseCustomDate(dateString: string) {
   const date = parse(dateString, "MMM d, yyyy", new Date());
@@ -67,7 +41,7 @@ function parseGames(): z.infer<typeof typesenseSchema>[] {
         return {
           ...parsed.data,
           release_date: parseCustomDate(parsed.data.release_date),
-          htlb_single: parsed.data.htlb_single === undefined ? 0 : parsed.data.htlb_single,
+          hltb_single: parsed.data.hltb_single === undefined ? 0 : parsed.data.hltb_single,
         };
       })
       .filter((game) => game !== undefined);
@@ -91,7 +65,7 @@ async function createCollection() {
       { name: "app_id", type: "int32" },
       { name: "min_owners", type: "int32", facet: true },
       { name: "max_owners", type: "int32", facet: true },
-      { name: "htlb_single", type: "int32" },
+      { name: "hltb_single", type: "int32" },
     ],
     default_sorting_field: "release_date",
   });
