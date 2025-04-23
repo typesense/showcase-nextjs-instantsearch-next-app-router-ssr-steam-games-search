@@ -36,6 +36,8 @@ function parseGames(): z.infer<typeof typesenseSchema>[] {
 
         // If the game doesn't match the schema, skip it
         if (!parsed.success) {
+          console.error("Invalid game data:", parsed.error);
+          console.error(line);
           return;
         }
         return {
@@ -105,6 +107,9 @@ async function main() {
   try {
     await upAll({ cwd: path.join(process.cwd()) });
     const games = parseGames();
+
+    console.log(`Successfully parsed ${games.length} games`);
+
     await indexGames(games);
     spinner.succeed("Script completed successfully.");
   } catch (error) {
