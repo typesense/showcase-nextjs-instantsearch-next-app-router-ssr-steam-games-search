@@ -21,7 +21,7 @@ const typesenseSchema = gameSchema.omit({ hltb_single: true, release_date: true 
   hltb_single: z.number(),
 });
 
-const attributeLabelMap: { [K in keyof z.infer<typeof typesenseSchema>]: string } = {
+const attributeLabelMap = {
   price: "Price",
   min_owners: "Minimum Owners",
   max_owners: "Maximum Owners",
@@ -31,6 +31,6 @@ const attributeLabelMap: { [K in keyof z.infer<typeof typesenseSchema>]: string 
   app_id: "App ID",
   positive: "Positive Reviews",
   release_date: "Release Date",
-} as const;
+} as const satisfies { [K in keyof z.infer<typeof typesenseSchema>]: string };
 
 export { attributeLabelMap, gameSchema, typesenseSchema };
