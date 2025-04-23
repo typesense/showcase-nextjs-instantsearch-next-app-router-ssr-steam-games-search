@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 const gameSchema = z.object({
-  name: z.string(),
+  name: z
+    .union([z.string(), z.number()])
+    .transform((val) => (typeof val === "number" ? val.toString() : val)),
   release_date: z.string(),
   price: z.number(),
   positive: z.number(),
@@ -9,7 +11,9 @@ const gameSchema = z.object({
   app_id: z.number(),
   min_owners: z.number(),
   max_owners: z.number(),
-  hltb_single: z.union([z.number(), z.undefined()]),
+  hltb_single: z
+    .union([z.number(), z.string()])
+    .transform((val) => (val === "" ? 0 : typeof val === "string" ? parseInt(val) : val)),
 });
 
 const typesenseSchema = gameSchema.omit({ hltb_single: true, release_date: true }).extend({
